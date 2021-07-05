@@ -23,12 +23,23 @@ T IList<T>::get(unsigned int index){ // Indexing
 }
 
 template <typename T>
-void IList<T>::add(unsigned int index, T val){
+void IList<T>::set(unsigned int index, T val){
     if (!notEmpty[index]){ // This index has not been used yet
         data[index] = val;
         _length++;
     } else { // Index has been used
         data[index] = val;
+    }
+    if (!firstElementAlreadyIn){ // Empty list
+        _min = _max = val;
+        firstElementAlreadyIn = true;
+    }
+    if (hasMinMax){ // The data type supports a minimum and a maximum
+        if (val < _min){ // New minimum
+            _min = val;
+        } else if (val > _max){
+            _max = val;
+        }
     }
     notEmpty[index] = true;
 }
@@ -60,16 +71,25 @@ void IList<T>::set_size(unsigned int newSize){
         data = newData;
         notEmpty = newNotEmpty;
         _size = newSize;
+    } else { // Smaller than the list, possible info lost
+        T * newData = new T[newSize];
+        for (unsigned int i = 0; i < newSize; i++){newData[i] = data[i];}
+        bool * newNotEmpty = new bool[newSize];
+        for (unsigned int i = 0; i < newSize; i++){newNotEmpty[i] = notEmpty[i];}
+        data = newData;
+        notEmpty = newNotEmpty;
+        _size = newSize;
     }
 }
 
 // Constructor
 template <typename T>
-IList<T>::IList(bool _ordered, unsigned int size){
+IList<T>::IList(bool _ordered, bool _hasMinMax, unsigned int size){
     _size = size;
     data = new T[size];
     auto temp = new bool[size];
     for (unsigned int i = 0; i < size; i++){temp[i] = false;} // Setting every value to false
     notEmpty = temp;
+    hasMinMax = _hasMinMax;
     ordered = _ordered;
 }
